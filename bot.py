@@ -1,7 +1,7 @@
 from telegram import ReplyKeyboardRemove, ReplyKeyboardMarkup, Update, ParseMode
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, ConversationHandler, CallbackContext
 import logging
-import solver
+from image_solver import ImageSolver
 import uuid
 import os
 from os.path import join, dirname
@@ -35,7 +35,8 @@ def to_solve(update: Update, context: CallbackContext):
     file = context.bot.getFile(update.message.photo[-1].file_id)
     file.download(filename)
     try:
-        way = solver.analise(filename)
+        solver = ImageSolver(filename)
+        solver.solve()
     except Exception as err:
         update.message.reply_text(
             'Exception was found. Exception msg: {}'.format(err.args),
@@ -45,14 +46,14 @@ def to_solve(update: Update, context: CallbackContext):
 
     os.remove(filename)
 
-    context.user_data['way'] = way
+    context.user_data['way'] = solver.way
     context.user_data['index'] = 0
 
     update.message.reply_text(
         'Answer was found. To navigate use text command or keyboard',
         reply_markup=ReplyKeyboardMarkup(reply_keyboard),
     )
-    print_current(update, way, 0)
+    print_current(update, solver.way, 0)
 
     return ANSWER
 
