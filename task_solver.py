@@ -137,8 +137,9 @@ class Solver:
     def solve(self):
         try:
             self._solve()
+            return False
         except Solved:
-            pass
+            return True
 
     def _is_solved(self):
         return list(map(lambda x: len(x), self._current)).count(0) == 2

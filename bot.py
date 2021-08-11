@@ -1,3 +1,5 @@
+import tempfile
+
 from telegram import ReplyKeyboardRemove, ReplyKeyboardMarkup, Update, ParseMode
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, ConversationHandler, CallbackContext
 import logging
@@ -16,11 +18,11 @@ logger = logging.getLogger(__name__)
 ANSWER = 0
 
 
-def start(update, context: CallbackContext):
+def start(update, _: CallbackContext):
     update.message.reply_text('Бот для решения паззла BallSortPuzzle ')
 
 
-def echo(update: Update, context: CallbackContext):
+def echo(update: Update, _: CallbackContext):
     """Echo the user message."""
     print(update.message)
 
@@ -31,31 +33,46 @@ reply_keyboard = [
 
 
 def to_solve(update: Update, context: CallbackContext):
-    filename = uuid.uuid4().__str__()
-    file = context.bot.getFile(update.message.photo[-1].file_id)
-    file.download(filename)
-    try:
-        solver = ImageSolver(filename)
-        solver.solve()
-    except Exception as err:
-        update.message.reply_text(
-            'Exception was found. Exception msg: {}'.format(err.args),
-            reply_markup=ReplyKeyboardMarkup(reply_keyboard),
-        )
-        return
+    effective_attachment = update.effective_message.effective_attachment
+    if isinstance(effective_attachment, list):
+        file_id = effective_attachment[-1].file_id
+    else:
+        file_id = effective_attachment.file_id
+    file = context.bot.get_file(file_id)
 
-    os.remove(filename)
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        file_name = os.path.join(tmp_dir, str(uuid.uuid4()))
+        file.download(file_name)
+        try:
+            solver = ImageSolver(file_name)
+            update.message.reply_text(
+                'Processing was started.',
+            )
+            is_solved = solver.solve()
+        except Exception as err:
+            update.message.reply_text(
+                'Exception was found. Exception msg: {}'.format(err.args),
+                reply_markup=ReplyKeyboardMarkup(reply_keyboard),
+            )
+            return ConversationHandler.END
 
     context.user_data['way'] = solver.way
     context.user_data['index'] = 0
 
-    update.message.reply_text(
-        'Answer was found. To navigate use text command or keyboard',
-        reply_markup=ReplyKeyboardMarkup(reply_keyboard),
-    )
-    print_current(update, solver.way, 0)
+    if is_solved:
+        update.message.reply_text(
+            'Answer was found. To navigate use text command or keyboard',
+            reply_markup=ReplyKeyboardMarkup(reply_keyboard),
+        )
+        print_current(update, solver.way, 0)
 
-    return ANSWER
+        return ANSWER
+    else:
+        update.message.reply_text(
+            'Solution is not found.',
+        )
+
+        return ConversationHandler.END
 
 
 def cancel(update: Update, _):
@@ -119,11 +136,11 @@ def main():
     dispatcher.add_handler(CommandHandler("cancel", cancel))
     dispatcher.add_handler(
         ConversationHandler(
-            entry_points=[MessageHandler(Filters.photo, to_solve)],
+            entry_points=[
+                MessageHandler(Filters.photo | Filters.document.mime_type("image/jpeg") & ~Filters.command, to_solve)],
             states={
                 ANSWER: [
                     MessageHandler(Filters.regex('^/(forward|backward|begin|end)$'), answer),
-                    MessageHandler(Filters.photo, to_solve),
                 ]
             },
             fallbacks=[CommandHandler('cancel', cancel)],

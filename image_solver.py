@@ -16,8 +16,9 @@ class ImageSolver:
     def solve(self):
         self._task = task_finder.analise(self._image_name)
         solver = Solver(self._task)
-        solver.solve()
+        is_solved = solver.solve()
         self._way = solver.way
+        return is_solved
 
     @property
     def task(self):
