@@ -3,11 +3,13 @@ import tempfile
 from telegram import ReplyKeyboardRemove, ReplyKeyboardMarkup, Update, ParseMode
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, ConversationHandler, CallbackContext
 import logging
-from image_solver import ImageSolver
 import uuid
 import os
 from os.path import join, dirname
 from dotenv import load_dotenv
+
+from solver.screenshot_cv import ScreenshotCV
+from solver.solution_finder import SolutionBuilder
 
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.DEBUG
@@ -44,11 +46,13 @@ def to_solve(update: Update, context: CallbackContext):
         file_name = os.path.join(tmp_dir, str(uuid.uuid4()))
         file.download(file_name)
         try:
-            solver = ImageSolver(file_name)
+            analyzer = ScreenshotCV(file_name)
             update.message.reply_text(
                 'Processing was started.',
             )
-            is_solved = solver.solve()
+            field, _ = analyzer.analyze()
+            solver = SolutionBuilder(field)
+            is_solved, way = solver.solve()
         except Exception as err:
             update.message.reply_text(
                 'Exception was found. Exception msg: {}'.format(err.args),
@@ -56,7 +60,7 @@ def to_solve(update: Update, context: CallbackContext):
             )
             return ConversationHandler.END
 
-    context.user_data['way'] = solver.way
+    context.user_data['way'] = way
     context.user_data['index'] = 0
 
     if is_solved:
@@ -64,7 +68,7 @@ def to_solve(update: Update, context: CallbackContext):
             'Answer was found. To navigate use text command or keyboard',
             reply_markup=ReplyKeyboardMarkup(reply_keyboard),
         )
-        print_current(update, solver.way, 0)
+        print_current(update, way, 0)
 
         return ANSWER
     else:
