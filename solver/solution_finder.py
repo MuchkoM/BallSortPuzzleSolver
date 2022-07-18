@@ -7,8 +7,17 @@ from solver.utils import all_equal
 
 class SolutionBuilder:
     def __init__(self, field: Field):
+        self.visited: VisitedFields = None
+        self.way: Way = None
+        self.current: Field = None
         self.field = field
         self.dimension = field.dimension
+        self.reset()
+
+    def reset(self):
+        self.current = field.copy()
+        self.way = Way()
+        self.visited = VisitedFields()
 
     def get_top_equal(self, col):
         for i in range(2, self.dimension):
@@ -16,7 +25,7 @@ class SolutionBuilder:
                 return i
         return 0
 
-    def get_source_cols(self, current):
+    def filter_source_cols(self, cols):
         def filter_cond(x):
             src_index, src_column = x
 
@@ -29,12 +38,16 @@ class SolutionBuilder:
 
             return True
 
+        return filter(filter_cond, cols)
+
+    def prior_source_cols(self, cols):
         def sorter(x):
-            return self.get_top_equal(x[1]), len(x[1])
+            _, column = x
+            return self.get_top_equal(column), len(column)
 
-        return sorted(filter(filter_cond, enumerate(current.field)), key=sorter)
+        return sorted(cols, key=sorter)
 
-    def get_des_cols(self, current, src_index, src_column):
+    def filter_des_cols(self, cols, src_index, src_column):
         def filter_cond(x):
             des_index, des_column = x
 
@@ -54,52 +67,51 @@ class SolutionBuilder:
 
             return True
 
+        return filter(filter_cond, cols)
+
+    def prior_des_cols(self, cols):
         def sorter(x):
-            return -self.get_top_equal(x[1]), - len(x[1])
+            _, column = x
+            return -self.get_top_equal(column), -len(column)
 
-        return sorted(filter(filter_cond, enumerate(current.field)), key=sorter)
+        return sorted(cols, key=sorter)
 
-    def get_indexes_and_element(self, current):
-        for src_index, src_column in self.get_source_cols(current):
-            des_arr = self.get_des_cols(current, src_index, src_column)
-            for des_index, des_column in des_arr:
+    def get_source_cols(self):
+        return self.prior_source_cols(self.filter_source_cols(self.current.get_enumerate()))
+
+    def get_des_cols(self, src_index, src_column):
+        return self.prior_des_cols(self.filter_des_cols(self.current.get_enumerate(), src_index, src_column))
+
+    def get_indexes_and_element(self):
+        for src_index, src_column in self.get_source_cols():
+            for des_index, _ in self.get_des_cols(src_index, src_column):
                 yield src_index, des_index, src_column[-1]
 
-    def _solve(self, way: Way, current: Field, visited: VisitedFields) -> bool:
-        visited.push(current)
-        for src_index, des_index, element in self.get_indexes_and_element(current):
-            way.push((src_index, des_index, element))
-            current.move(src_index, des_index)
+    def solve(self) -> bool:
+        if self.visited.is_try_visit(self.current):
+            return False
 
-            if not visited.is_visited(current):
-                if not current.is_solved():
-                    result = self._solve(way, current, visited)
-                    if result:
-                        return True
-                else:
-                    return True
+        if self.current.is_solved():
+            return True
 
-            current.move(des_index, src_index)
-            way.pop()
+        for src_index, des_index, element in self.get_indexes_and_element():
+            self.way.push((src_index, des_index, element))
+            self.current.move(src_index, des_index)
 
-    def solve(self):
-        current = self.field.copy()
-        way = Way()
-        visited = VisitedFields()
+            if self.solve():
+                return True
 
-        return self._solve(way, current, visited), way
+            self.current.move(des_index, src_index)
+            self.way.pop()
 
 
 if __name__ == "__main__":
-    from examples.level2__.const import field_arr, palette_arr
+    from examples.level297.const import field_arr, palette_arr
 
     field = Field(field_arr)
     palette = Palette(palette_arr)
     solver = SolutionBuilder(field)
 
-    is_solved, way = solver.solve()
-    print(way.way)
-
-    solution_printer = SolutionPrinter(field, way, palette)
-    solution_printer.print_way()
-    print(len(way.way))
+    if solver.solve():
+        solution_printer = SolutionPrinter(field, solver.way, palette)
+        solution_printer.print_way()

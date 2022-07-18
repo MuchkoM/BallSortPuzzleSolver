@@ -5,13 +5,12 @@ from solver.utils import get_file
 
 if __name__ == "__main__":
     analyzer = ScreenshotCV(get_file())
-    field, palette = analyzer.analyze()
+    analyzer.analyze()
 
-    solver = SolutionBuilder(field)
+    solver = SolutionBuilder(analyzer.field)
 
-    is_solved, way = solver.solve()
-    if is_solved:
-        solution_printer = SolutionPrinter(field, way, palette)
+    if solver.solve():
+        solution_printer = SolutionPrinter(analyzer.field, solver.way, analyzer.palette)
         solution_printer.print_way()
     else:
-        print('Solution is not found', way.way)
+        print('Solution is not found')

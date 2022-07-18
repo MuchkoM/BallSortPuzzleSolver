@@ -29,6 +29,9 @@ class Field:
     def move(self, source, destination):
         self.field[destination].append(self.field[source].pop())
 
+    def get_enumerate(self):
+        return enumerate(self.field)
+
     def copy(self):
         return copy.deepcopy(self)
 

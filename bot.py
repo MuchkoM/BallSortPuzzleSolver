@@ -50,9 +50,9 @@ def to_solve(update: Update, context: CallbackContext):
             update.message.reply_text(
                 'Processing was started.',
             )
-            field, _ = analyzer.analyze()
-            solver = SolutionBuilder(field)
-            is_solved, way = solver.solve()
+            analyzer.analyze()
+            solver = SolutionBuilder(analyzer.field)
+            is_solved = solver.solve()
         except Exception as err:
             update.message.reply_text(
                 'Exception was found. Exception msg: {}'.format(err.args),
@@ -60,7 +60,7 @@ def to_solve(update: Update, context: CallbackContext):
             )
             return ConversationHandler.END
 
-    context.user_data['way'] = way
+    context.user_data['way'] = solver.way
     context.user_data['index'] = 0
 
     if is_solved:
@@ -68,7 +68,7 @@ def to_solve(update: Update, context: CallbackContext):
             'Answer was found. To navigate use text command or keyboard',
             reply_markup=ReplyKeyboardMarkup(reply_keyboard),
         )
-        print_current(update, way, 0)
+        print_current(update, solver.way, 0)
 
         return ANSWER
     else:

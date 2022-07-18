@@ -1,5 +1,4 @@
 import math
-from typing import Tuple
 
 import cv2
 
@@ -81,20 +80,22 @@ def comp(column):
 class ScreenshotCV:
     def __init__(self, path):
         self.path = path
+        self.field = None
+        self.palette = None
 
-    def analyze(self) -> Tuple[Field, Palette]:
+    def analyze(self):
         image = resize_image(cv2.imread(self.path))
         contours, hierarchy = build_contours(image)
-        palette = Palette()
+        self.palette = Palette()
         res = hierarchy_analyser(hierarchy[0])
-        res = map2d(lambda x: build_element(contours[x], image, palette), res)
+        res = map2d(lambda x: build_element(contours[x], image, self.palette), res)
         res = sorted(res, key=comp)
         res = map2d(lambda x: x[2], res)
-        return Field(res), palette
+        self.field = Field(res)
 
 
 if __name__ == '__main__':
     analyzer = ScreenshotCV(get_file())
-    field, palette = analyzer.analyze()
-    printer = FieldPrinter(field, palette)
+    analyzer.analyze()
+    printer = FieldPrinter(analyzer.field, analyzer.palette)
     printer.print()

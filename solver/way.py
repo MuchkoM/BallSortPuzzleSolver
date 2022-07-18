@@ -1,3 +1,4 @@
+import copy
 from typing import Tuple, List
 
 from solver.field import Field
@@ -12,6 +13,9 @@ class Way:
 
     def pop(self):
         self.way.pop()
+
+    def copy(self):
+        return copy.deepcopy(self)
 
 
 class VisitedFields:
@@ -31,6 +35,12 @@ class VisitedFields:
             if self.is_eq(current, ar):
                 return True
         return False
+
+    def is_try_visit(self, current: Field) -> bool:
+        if not self.is_visited(current):
+            self.push(current)
+        else:
+            return True
 
     def push(self, current: Field):
         self.visited.append(current.copy())

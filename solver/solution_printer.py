@@ -97,7 +97,7 @@ class SolutionPrinter:
     # todo add splitting by line top is higher
     def __init__(self, field: Field, way: Way, palette: Palette):
         self.palette = palette
-        self.way = way
+        self.way = way.copy()
         self.field = field.copy()
 
     def print_way(self):
