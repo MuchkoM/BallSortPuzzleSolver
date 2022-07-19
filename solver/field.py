@@ -20,8 +20,8 @@ class Field:
         return all_equal(counter.values())
 
     def is_solved(self):
-        for el in self.field:
-            is_equal = all_equal(el) and (len(el) == self.dimension or len(el) == 0)
+        for col in self.field:
+            is_equal = (len(col) == self.dimension and all_equal(col)) or len(col) == 0
             if not is_equal:
                 return False
         return True
@@ -34,6 +34,9 @@ class Field:
 
     def copy(self):
         return copy.deepcopy(self)
+
+    def __hash__(self):
+        return hash(frozenset(map(tuple, self.field)))
 
 
 if __name__ == "__main__":

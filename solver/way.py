@@ -17,30 +17,36 @@ class Way:
     def copy(self):
         return copy.deepcopy(self)
 
+    def __len__(self):
+        return len(self.way)
+
+    def __str__(self):
+        return str(self.way)
+
+    def __repr__(self):
+        return str(self.way)
+
+
+class Ways:
+    def __init__(self):
+        self.arr = []
+
+    def add(self, way: Way):
+        self.arr.append(way.copy())
+
+    def is_solved(self):
+        return len(self.arr) > 0
+
+    def fast_way(self):
+        return sorted(self.arr, key=lambda x: len(x))[0]
+
 
 class VisitedFields:
     def __init__(self):
-        self.visited = []
-
-    def is_eq(self, ar1: Field, ar2: Field):
-        if len(ar1.field) != len(ar2.field):
-            return False
-        for el1, el2 in zip(ar1.field, ar2.field):
-            if el1 != el2:
-                return False
-        return True
+        self.visited = set()
 
     def is_visited(self, current: Field):
-        for ar in self.visited:
-            if self.is_eq(current, ar):
-                return True
-        return False
+        return current in self.visited
 
-    def is_try_visit(self, current: Field) -> bool:
-        if not self.is_visited(current):
-            self.push(current)
-        else:
-            return True
-
-    def push(self, current: Field):
-        self.visited.append(current.copy())
+    def visit(self, current: Field):
+        self.visited.add(current)

@@ -2,10 +2,9 @@ import glob
 import math
 import os
 from typing import Union, Tuple
-from itertools import groupby
 
 
-def colored_text_rgb(r, g, b, txt):
+def colored_text_rgb(r: int, g: int, b: int, txt: Union[str, int]):
     return f"\033[38;2;{r};{g};{b}m{txt}\033[m"
 
 
@@ -14,8 +13,7 @@ def cie76(c1: Tuple[int, int, int], c2: Tuple[int, int, int]):
 
 
 def colored_text(color: [int, int, int], text: Union[str, int]):
-    b, g, r = color
-    return colored_text_rgb(r, g, b, text)
+    return colored_text_rgb(*reversed(color), text)
 
 
 def get_alpha(index: int):
@@ -26,9 +24,39 @@ def get_int_color(pixel):
     return int(pixel[0]), int(pixel[1]), int(pixel[2])
 
 
-def all_equal(iterable):
-    g = groupby(iterable)
-    return next(g, True) and not next(g, False)
+def all_equal(col):
+    first = col[0]
+    for el in col:
+        if el != first:
+            return False
+    return True
+
+
+def get_top_equal(col, length):
+    if length == 0:
+        return 0
+    for i in range(1, length):
+        if col[-1 - i] != col[-1]:
+            return i
+
+    return length
+
+
+def strange_top_equal(col, length):
+    if length < 2:
+        return 0
+    if col[-1] == col[-2]:
+        return 2
+    else:
+        return 0
+
+
+def get_col_prop(column):
+    length = len(column)
+    top = -length
+    middle = strange_top_equal(column, length)
+    bot = top - middle
+    return middle, bot, top
 
 
 def get_file():

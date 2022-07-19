@@ -8,9 +8,10 @@ if __name__ == "__main__":
     analyzer.analyze()
 
     solver = SolutionBuilder(analyzer.field)
+    solver.solve()
 
-    if solver.solve():
-        solution_printer = SolutionPrinter(analyzer.field, solver.way, analyzer.palette)
+    if solver.is_solved():
+        solution_printer = SolutionPrinter(analyzer.field, solver.fast_way(), analyzer.palette)
         solution_printer.print_way()
     else:
         print('Solution is not found')
