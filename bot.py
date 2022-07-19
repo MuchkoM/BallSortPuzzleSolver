@@ -1,12 +1,12 @@
-import tempfile
-
-from telegram import ReplyKeyboardRemove, ReplyKeyboardMarkup, Update, ParseMode
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, ConversationHandler, CallbackContext
 import logging
-import uuid
 import os
+import tempfile
+import uuid
 from os.path import join, dirname
+
 from dotenv import load_dotenv
+from telegram import ReplyKeyboardRemove, ReplyKeyboardMarkup, Update
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, ConversationHandler, CallbackContext
 
 from solver.screenshot_cv import ScreenshotCV
 from solver.solution_finder import SolutionBuilder
@@ -65,7 +65,7 @@ def to_solve(update: Update, context: CallbackContext):
             'Answer was found. To navigate use text command or keyboard',
             reply_markup=ReplyKeyboardMarkup(reply_keyboard),
         )
-        context.user_data['way'] = solver.fast_way()
+        context.user_data['way'] = solver.solved_way
         context.user_data['index'] = 0
         print_current(update, context.user_data['way'], 0)
 

@@ -60,7 +60,7 @@ def get_col_prop(column):
 
 
 def get_file():
-    files = glob.glob('examples/level297/*.jpeg')
+    files = glob.glob('./examples/level298/*.jpeg')
     files.sort(key=lambda x: os.path.getctime(x))
 
     return files[-1]

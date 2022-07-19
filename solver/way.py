@@ -26,6 +26,12 @@ class Way:
     def __repr__(self):
         return str(self.way)
 
+    def __contains__(self, item):
+        return item in self.way
+
+    def is_worse(self, solved_way):
+        return not solved_way or (len(self) < len(solved_way))
+
 
 class Ways:
     def __init__(self):

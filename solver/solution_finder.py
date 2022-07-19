@@ -4,7 +4,7 @@ from solver.field import Field
 from solver.palette import Palette
 from solver.solution_printer import SolutionPrinter
 from solver.utils import all_equal
-from solver.way import Way, VisitedFields, Ways
+from solver.way import Way, VisitedFields
 
 
 class SolutionBuilder:
@@ -12,22 +12,19 @@ class SolutionBuilder:
         self.visited: VisitedFields = None
         self.way: Way = None
         self.current: Field = None
-        self.ways: Ways = None
+        self.solved_way: Way = None
         self.field = field
         self.dimension = field.dimension
         self.reset()
 
     def is_solved(self):
-        return self.ways.is_solved()
-
-    def fast_way(self):
-        return self.ways.fast_way()
+        return not self.solved_way or len(self.solved_way) > 0
 
     def reset(self):
         self.current = self.field.copy()
         self.way = Way()
         self.visited = VisitedFields()
-        self.ways = Ways()
+        self.solved_way = None
 
     def filter_source_cols(self, cols):
         def filter_cond(x):
@@ -62,6 +59,9 @@ class SolutionBuilder:
             if des_len == 0 and all_equal(src_column):
                 return False
 
+            if (des_index, src_index, src_column[-1]) in self.way:
+                return False
+
             return True
 
         return tuple(filter(filter_cond, cols))
@@ -79,7 +79,8 @@ class SolutionBuilder:
 
     def solve(self):
         if self.current.is_solved():
-            self.ways.add(self.way)
+            if self.way.is_worse(self.solved_way):
+                self.solved_way = self.way.copy()
             return
         if self.visited.is_visited(self.current):
             return
@@ -107,9 +108,9 @@ if __name__ == "__main__":
     duration = datetime.now() - start
 
     if solver.is_solved():
-        solution_printer = SolutionPrinter(field, solver.fast_way(), palette)
+        solution_printer = SolutionPrinter(field, solver.solved_way, palette)
         solution_printer.print_way()
 
-        print(len(solver.ways.arr), tuple(map(len, solver.ways.arr)))
+        print(solver.solved_way)
         print(len(solver.visited.visited))
         print(duration)

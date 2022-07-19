@@ -11,7 +11,7 @@ if __name__ == "__main__":
     solver.solve()
 
     if solver.is_solved():
-        solution_printer = SolutionPrinter(analyzer.field, solver.fast_way(), analyzer.palette)
+        solution_printer = SolutionPrinter(analyzer.field, solver.solved_way, analyzer.palette)
         solution_printer.print_way()
     else:
         print('Solution is not found')
