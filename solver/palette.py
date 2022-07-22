@@ -17,3 +17,6 @@ class Palette:
                 return know_index
         self.palette.append(color)
         return len(self.palette) - 1
+
+    def __repr__(self):
+        return str(self.palette)

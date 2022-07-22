@@ -1,8 +1,6 @@
 import copy
 from typing import Tuple, List
 
-from solver.field import Field
-
 
 class Way:
     def __init__(self, way=None):
@@ -14,6 +12,7 @@ class Way:
     def pop(self):
         self.way.pop()
 
+    @property
     def copy(self):
         return copy.deepcopy(self)
 
@@ -29,30 +28,5 @@ class Way:
     def __contains__(self, item):
         return item in self.way
 
-    def is_worse(self, solved_way):
+    def is_better(self, solved_way):
         return not solved_way or (len(self) < len(solved_way))
-
-
-class Ways:
-    def __init__(self):
-        self.arr = []
-
-    def add(self, way: Way):
-        self.arr.append(way.copy())
-
-    def is_solved(self):
-        return len(self.arr) > 0
-
-    def fast_way(self):
-        return sorted(self.arr, key=lambda x: len(x))[0]
-
-
-class VisitedFields:
-    def __init__(self):
-        self.visited = set()
-
-    def is_visited(self, current: Field):
-        return current in self.visited
-
-    def visit(self, current: Field):
-        self.visited.add(current)

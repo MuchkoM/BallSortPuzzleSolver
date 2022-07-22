@@ -97,11 +97,11 @@ class SolutionPrinter:
     # todo add splitting by line top is higher
     def __init__(self, field: Field, way: Way, palette: Palette):
         self.palette = palette
-        self.way = way.copy()
-        self.field = field.copy()
+        self.way = way.copy
+        self.field = field.copy
 
     def print_way(self):
-        current = self.field.copy()
+        current = self.field.copy
         field_printer = FieldPrinter(current, self.palette)
         for i, (src, des, el) in enumerate(self.way.way):
             field_printer.print(self.build_header(src, des, el), f'{i + 1}')

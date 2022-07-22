@@ -9,7 +9,7 @@ from telegram import ReplyKeyboardRemove, ReplyKeyboardMarkup, Update
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, ConversationHandler, CallbackContext
 
 from solver.screenshot_cv import ScreenshotCV
-from solver.solution_finder import SolutionBuilder
+from solver.solution_finder import SolutionFinder
 
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.DEBUG
@@ -51,7 +51,7 @@ def to_solve(update: Update, context: CallbackContext):
                 'Processing was started.',
             )
             analyzer.analyze()
-            solver = SolutionBuilder(analyzer.field)
+            solver = SolutionFinder(analyzer.field)
             solver.solve()
         except Exception as err:
             update.message.reply_text(
@@ -60,7 +60,7 @@ def to_solve(update: Update, context: CallbackContext):
             )
             return ConversationHandler.END
 
-    if solver.is_solved():
+    if solver.is_solved:
         update.message.reply_text(
             'Answer was found. To navigate use text command or keyboard',
             reply_markup=ReplyKeyboardMarkup(reply_keyboard),

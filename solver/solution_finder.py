@@ -4,10 +4,11 @@ from solver.field import Field
 from solver.palette import Palette
 from solver.solution_printer import SolutionPrinter
 from solver.utils import all_equal
-from solver.way import Way, VisitedFields
+from solver.visited_fields import VisitedFields
+from solver.way import Way
 
 
-class SolutionBuilder:
+class SolutionFinder:
     def __init__(self, field: Field):
         self.visited: VisitedFields = None
         self.way: Way = None
@@ -15,16 +16,10 @@ class SolutionBuilder:
         self.solved_way: Way = None
         self.field = field
         self.dimension = field.dimension
-        self.reset()
 
+    @property
     def is_solved(self):
-        return not self.solved_way or len(self.solved_way) > 0
-
-    def reset(self):
-        self.current = self.field.copy()
-        self.way = Way()
-        self.visited = VisitedFields()
-        self.solved_way = None
+        return self.solved_way and len(self.solved_way) > 0
 
     def filter_source_cols(self, cols):
         def filter_cond(x):
@@ -34,14 +29,14 @@ class SolutionBuilder:
             if src_len == 0:
                 return False
 
-            if src_len == self.dimension and all_equal(src_column):
+            if (src_len == self.dimension or src_len == self.dimension - 1) and all_equal(src_column):
                 return False
 
             return True
 
-        return tuple(filter(filter_cond, cols))
+        return filter(filter_cond, cols)
 
-    def filter_des_cols(self, cols, src_index, src_column):
+    def filter_des_cols(self, current_enum, src_index, src_column):
         def filter_cond(x):
             des_index, des_column = x
 
@@ -64,33 +59,48 @@ class SolutionBuilder:
 
             return True
 
-        return tuple(filter(filter_cond, cols))
+        return filter(filter_cond, current_enum)
 
     def get_source_cols(self):
-        return self.filter_source_cols(self.current.get_enumerate())
+        return self.filter_source_cols(self.current.enumerate)
 
     def get_des_cols(self, src_index, src_column):
-        return self.filter_des_cols(self.current.get_enumerate(), src_index, src_column)
+        return self.filter_des_cols(self.current.enumerate, src_index, src_column)
 
-    def get_indexes_and_element(self):
+    def get_next_possible_way(self):
         for src_index, src_column in self.get_source_cols():
-            for des_index, _ in self.get_des_cols(src_index, src_column):
-                yield src_index, des_index, src_column[-1]
+            for des_index, des_column in self.get_des_cols(src_index, src_column):
+                yield src_index, src_column, des_index, des_column, src_column[-1]
 
     def solve(self):
-        if self.current.is_solved():
-            if self.way.is_worse(self.solved_way):
-                self.solved_way = self.way.copy()
-            return
-        if self.visited.is_visited(self.current):
-            return
-        self.visited.visit(self.current)
+        self.current = self.field.copy
+        self.way = Way()
+        self.visited = VisitedFields()
+        self.solved_way = None
+        try:
+            self.inner_solve()
+        except KeyboardInterrupt:
+            print('Process was interrupted')
+            pass
 
-        for src_index, des_index, element in self.get_indexes_and_element():
+    def inner_solve(self):
+        if self.current.is_solved:
+            if self.way.is_better(self.solved_way):
+                print(len(self.way))
+                self.solved_way = self.way.copy
+            return
+
+        if self.solved_way and (len(self.way) > len(self.solved_way)):
+            return
+
+        if self.visited.is_known(self.current, self.way):
+            return
+
+        for src_index, src_column, des_index, des_column, element in self.get_next_possible_way():
             self.way.push((src_index, des_index, element))
             self.current.move(src_index, des_index)
 
-            self.solve()
+            self.inner_solve()
 
             self.current.move(des_index, src_index)
             self.way.pop()
@@ -101,16 +111,16 @@ if __name__ == "__main__":
 
     field = Field(field_arr)
     palette = Palette(palette_arr)
-    solver = SolutionBuilder(field)
+    solver = SolutionFinder(field)
 
     start = datetime.now()
     solver.solve()
     duration = datetime.now() - start
 
-    if solver.is_solved():
+    if solver.is_solved:
         solution_printer = SolutionPrinter(field, solver.solved_way, palette)
         solution_printer.print_way()
 
         print(solver.solved_way)
-        print(len(solver.visited.visited))
+        print(len(solver.visited))
         print(duration)
