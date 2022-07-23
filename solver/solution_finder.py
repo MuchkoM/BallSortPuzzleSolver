@@ -61,15 +61,9 @@ class SolutionFinder:
 
         return filter(filter_cond, current_enum)
 
-    def get_source_cols(self):
-        return self.filter_source_cols(self.current.enumerate)
-
-    def get_des_cols(self, src_index, src_column):
-        return self.filter_des_cols(self.current.enumerate, src_index, src_column)
-
     def get_next_possible_way(self):
-        for src_index, src_column in self.get_source_cols():
-            for des_index, des_column in self.get_des_cols(src_index, src_column):
+        for src_index, src_column in self.filter_source_cols(self.current.enumerate):
+            for des_index, des_column in self.filter_des_cols(self.current.enumerate, src_index, src_column):
                 yield src_index, src_column, des_index, des_column, src_column[-1]
 
     def solve(self):
