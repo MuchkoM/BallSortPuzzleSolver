@@ -1,8 +1,10 @@
+import io
+
 from solver.field import Field
-from solver.palette import Palette
-from solver.way import Way
 from solver.field_printer import FieldPrinter
+from solver.palette import Palette
 from solver.utils import colored_text
+from solver.way import Way
 
 
 # def printer(array, row_num=None, next_line=7, header1="", header2=""):
@@ -94,25 +96,55 @@ from solver.utils import colored_text
 
 
 class SolutionPrinter:
-    # todo add splitting by line top is higher
     def __init__(self, field: Field, way: Way, palette: Palette):
+        self.field = field
+        self.way = way
         self.palette = palette
-        self.way = way.copy
-        self.field = field.copy
+
+        self.step_list = []
+
+    def build(self):
+        current = self.field.copy
+
+        self.step_list = []
+
+        for i, (src, des, el) in enumerate(self.way):
+            self.add_step(
+                field=current,
+                header=self.header(src, des, el),
+                footer='Step {} out {}'.format(i + 1, len(self.way))
+            )
+
+            current.move(src, des)
+        self.add_step(
+            field=current,
+            header=' ',
+            footer='Solved in {} steps'.format(len(self.way))
+        )
+
+    def add_step(self, field, header, footer):
+        printer = FieldPrinter(field, self.palette)
+        str_io = io.StringIO()
+        printer.print(header, footer, str_io)
+
+        self.step_list.append(str_io.getvalue())
+
+    def header(self, src, des, el):
+        header_arr = [' '] * self.field.column
+        header_arr[src] = colored_text(self.palette.get_color_by_index(el), '↑')
+        header_arr[des] = colored_text(self.palette.get_color_by_index(el), '↓')
+
+        return '   '.join(header_arr)
+
+    def __len__(self):
+        return len(self.step_list)
+
+    def __getitem__(self, item):
+        return self.step_list[item]
 
     def print_way(self):
-        current = self.field.copy
-        field_printer = FieldPrinter(current, self.palette)
-        for i, (src, des, el) in enumerate(self.way.way):
-            field_printer.print(self.build_header(src, des, el), f'{i + 1}')
-            current.move(src, des)
-        field_printer.print(header=' ', footer=f'Solution is reachable in {len(self.way.way)} steps')
-
-    def build_header(self, source, dest, el) -> str:
-        header_arr = [' '] * self.field.column
-        header_arr[source] = colored_text(self.palette.get_color_by_index(el), '↑')
-        header_arr[dest] = colored_text(self.palette.get_color_by_index(el), '↓')
-        return '   '.join(header_arr)
+        for step in self.step_list:
+            print(step)
 
 
 if __name__ == '__main__':
@@ -123,4 +155,5 @@ if __name__ == '__main__':
     palette = Palette(palette_arr)
 
     solution_printer = SolutionPrinter(field, way, palette)
+    solution_printer.build()
     solution_printer.print_way()
