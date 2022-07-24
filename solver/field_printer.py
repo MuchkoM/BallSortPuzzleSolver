@@ -1,8 +1,8 @@
 import copy
+import sys
 
-from solver.palette import Palette
 from solver.field import Field
-
+from solver.palette import Palette
 from solver.utils import colored_text, get_alpha
 
 
@@ -30,11 +30,11 @@ class FieldPrinter:
 
         return lines
 
-    def print(self, header: str = None, footer: str = None):
+    def print(self, header: str = None, footer: str = None, stream=sys.stdout):
         lines = self.lines_normalizer(self.field.field, self.field.dimension)
 
         if header:
-            print(header)
+            print(header, file=stream)
 
         for line in lines:
             symbols = []
@@ -46,9 +46,9 @@ class FieldPrinter:
                         symbols.append(symbol)
                 else:
                     symbols.append(symbol)
-            print(*symbols, sep=' | ')
+            print(*symbols, sep=' | ', file=stream)
         if footer:
-            print(footer)
+            print(footer, file=stream)
 
 
 if __name__ == '__main__':

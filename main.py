@@ -1,6 +1,6 @@
 from solver.screenshot_cv import ScreenshotCV
 from solver.solution_finder import SolutionFinder
-from solver.solution_printer import SolutionPrinter
+from solver.solution_printer_stepped import SolutionPrinterStepped
 from solver.utils import get_file
 
 if __name__ == "__main__":
@@ -11,7 +11,7 @@ if __name__ == "__main__":
     solver.solve()
 
     if solver.is_solved:
-        solution_printer = SolutionPrinter(analyzer.field, solver.solved_way, analyzer.palette)
-        solution_printer.print_way()
+        solution_printer = SolutionPrinterStepped(analyzer.field, solver.solved_way, analyzer.palette)
+        solution_printer.interact()
     else:
         print('Solution is not found')

@@ -1,6 +1,9 @@
 import glob
 import math
 import os
+import sys
+import termios
+import tty
 from typing import Union, Tuple
 
 
@@ -37,3 +40,14 @@ def get_file():
     files.sort(key=lambda x: os.path.getctime(x))
 
     return files[-1]
+
+
+def getch():
+    fd = sys.stdin.fileno()
+    orig = termios.tcgetattr(fd)
+
+    try:
+        tty.setcbreak(fd)  # or tty.setraw(fd) if you prefer raw mode's behavior.
+        return sys.stdin.read(1)
+    finally:
+        termios.tcsetattr(fd, termios.TCSAFLUSH, orig)

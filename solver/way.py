@@ -12,6 +12,9 @@ class Way:
     def pop(self):
         self.way.pop()
 
+    def __getitem__(self, item):
+        return self.way[item]
+
     @property
     def copy(self):
         return copy.deepcopy(self)
