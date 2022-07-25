@@ -26,7 +26,7 @@ class SolutionPrinter:
             self.add_step(
                 field=current,
                 header=(src, des, el),
-                footer='Step {} out {}'.format(i + 1, len(self.way))
+                footer='Step {} out of {}'.format(i + 1, len(self.way))
             )
 
             current.move(src, des)
@@ -36,7 +36,7 @@ class SolutionPrinter:
             footer='Solved in {} steps'.format(len(self.way))
         )
 
-    def add_step(self, field, header: Tuple[int, int, int] | str | None = None, footer=None):
+    def add_step(self, field: Field, header: Tuple[int, int, int] | str | None = None, footer: str | None = None):
         printer = FieldPrinter(field, self.palette)
         str_io = io.StringIO()
         printer.print(header, footer, str_io)
@@ -46,7 +46,7 @@ class SolutionPrinter:
     def __len__(self):
         return len(self.step_list)
 
-    def __getitem__(self, item):
+    def __getitem__(self, item: int):
         return self.step_list[item]
 
     def print_way(self):

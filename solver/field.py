@@ -41,17 +41,14 @@ class Field:
     def __eq__(self, other):
         return hash(self) == hash(other)
 
+    def __getitem__(self, item):
+        return self.field[item]
+
+    def __len__(self):
+        return len(self.field)
+
     def __hash__(self):
         return hash(self.tuple)
-
-    def get_transformed_field_array(self):
-        res_list: List[List[None | int]] = [[None] * self.column for _ in range(self.dimension)]
-
-        for i, col in enumerate(self.field):
-            for j, el in enumerate(col):
-                res_list[self.dimension - j - 1][i] = el
-
-        return res_list
 
 
 if __name__ == "__main__":

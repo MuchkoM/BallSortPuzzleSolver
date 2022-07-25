@@ -59,4 +59,8 @@ def map2d(callback, res):
 
 def print2d(array, joiner: str, stream):
     for line in array:
-        print(joiner.join(line), file=stream)
+        print1d(line, joiner, stream)
+
+
+def print1d(array, joiner: str, stream):
+    print(*array, sep=joiner, file=stream)
