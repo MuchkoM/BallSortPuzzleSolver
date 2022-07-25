@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 import os
+import sys
 
 from solver.field import Field
 from solver.palette import Palette
@@ -22,7 +25,7 @@ class Commands:
 
 
 class SolutionPrinterStepped:
-    def __init__(self, field: Field, way: Way, palette: Palette):
+    def __init__(self, field: Field, way: Way, palette: Palette | None = None):
         self.print_step_list = SolutionPrinter(field, way, palette)
         self.print_step_list.build()
 
@@ -34,31 +37,38 @@ class SolutionPrinterStepped:
 
         self.index = 0
 
-    def interact(self):
-        self.index = 0
+    def interact(self, stream=sys.stdout):
+        self.being()
 
-        self.print()
+        self.print(stream)
 
         self.commands.wait_input()
 
-    def forward(self):
+    def increment(self):
         if self.index != len(self.print_step_list) - 1:
             self.index += 1
 
-        self.print()
-
-    def backward(self):
+    def decrement(self):
         if self.index != 0:
             self.index -= 1
 
-        self.print()
+    def being(self):
+        self.index = 0
 
-    def print(self):
+    def forward(self, stream=sys.stdout):
+        self.increment()
+        self.print(stream)
+
+    def backward(self, stream=sys.stdout):
+        self.decrement()
+        self.print(stream)
+
+    def print(self, stream=sys.stdout):
         os.system('clear')
-        print(self.print_step_list[self.index], end='')
+        print(self.print_step_list[self.index], end='', file=stream)
 
-    def end(self):
-        print('Exit')
+    def end(self, stream=sys.stdout):
+        print('Exit', file=stream)
         return True
 
 

@@ -24,8 +24,7 @@ def get_transformed_field_array(field, dimension):
 
 
 class FieldPrinter:
-    def __init__(self, field: Field, palette: Palette = None, is_colored=True):
-        self.is_colored = is_colored
+    def __init__(self, field: Field, palette: Palette = None):
         self.field = field
         self.palette = palette
         self.field_filler = ' | '
@@ -37,7 +36,7 @@ class FieldPrinter:
         self.des_header_filler = '↓'
 
     def get_output_el(self, el, symbol):
-        if self.is_colored:
+        if self.palette:
             return colored_text(self.palette.get_color_by_index(el), symbol)
         else:
             return symbol
@@ -46,7 +45,6 @@ class FieldPrinter:
         header_arr = [self.header_empty] * self.field.column
         header_arr[src] = self.get_output_el(el, self.src_header_filler)
         header_arr[des] = self.get_output_el(el, self.des_header_filler)
-
         return header_arr
 
     def splatted_header(self, header, split_index):
@@ -87,15 +85,13 @@ if __name__ == '__main__':
 
     field = Field(field_arr)
     palette = Palette(palette_arr)
-    field_printer = FieldPrinter(field, palette, False)
+    field_printer = FieldPrinter(field, palette)
     print('Output 1')
     field_printer.print(header=(1, 12, 0), footer='Step 1')
     print('Output 2')
     field_printer.print(footer='Solved')
     print('Output 3')
-    field_printer.is_colored = True
     field_printer.print(header='Solution', footer='Solved')
     print('Output 4')
-    field_printer.is_colored = False
     field_printer.print()
     print('End')

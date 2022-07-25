@@ -10,7 +10,7 @@ from solver.way import Way
 
 
 class SolutionPrinter:
-    def __init__(self, field: Field, way: Way, palette: Palette):
+    def __init__(self, field: Field, way: Way, palette: Palette | None = None):
         self.field = field
         self.way = way
         self.palette = palette

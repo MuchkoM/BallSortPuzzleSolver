@@ -2,6 +2,7 @@ import logging
 import os
 import tempfile
 import uuid
+from io import StringIO
 from os.path import join, dirname
 
 from dotenv import load_dotenv
@@ -10,6 +11,7 @@ from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, Conve
 
 from solver.screenshot_cv import ScreenshotCV
 from solver.solution_finder import SolutionFinder
+from solver.solution_printer_stepped import SolutionPrinterStepped
 
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.DEBUG
@@ -18,6 +20,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 ANSWER = 0
+SOLUTION = 'SOLUTION'
 
 
 def start(update, _: CallbackContext):
@@ -65,10 +68,8 @@ def to_solve(update: Update, context: CallbackContext):
             'Answer was found. To navigate use text command or keyboard',
             reply_markup=ReplyKeyboardMarkup(reply_keyboard),
         )
-        context.user_data['way'] = solver.solved_way
-        context.user_data['index'] = 0
-        print_current(update, context.user_data['way'], 0)
-
+        context.user_data[SOLUTION] = solution = SolutionPrinterStepped(solver.field, solver.solved_way)
+        reply_with_step(update, solution)
         return ANSWER
     else:
         update.message.reply_text(
@@ -87,44 +88,31 @@ def cancel(update: Update, _):
     return ConversationHandler.END
 
 
-def flask_to_str(source):
-    return f'{source % 7 + 1}{"↑" if source // 7 == 1 else "↓"}'
-
-
-def print_current(update, way, index):
-    s, t, c = way[index]
+def reply_with_step(update, solution):
+    str_io = StringIO()
+    solution.print(str_io)
     update.message.reply_text(
-        text='From {} to {}. Step {} from {}'.format(
-            flask_to_str(s),
-            flask_to_str(t),
-            index + 1,
-            len(way)
-        ),
+        text=str_io.getvalue(),
         reply_markup=ReplyKeyboardMarkup(reply_keyboard),
     )
 
 
 def answer(update: Update, context):
-    way = context.user_data['way']
-    index = context.user_data['index']
-
+    solution: SolutionPrinterStepped = context.user_data[SOLUTION]
     if update.message.text == '/forward':
-        if index < len(way):
-            index += 1
+        solution.increment()
     elif update.message.text == '/backward':
-        if index > 0:
-            index -= 1
+        solution.decrement()
     elif update.message.text == '/begin':
-        index = 0
+        solution.being()
     elif update.message.text == '/end':
+        del context.user_data[SOLUTION]
         update.message.reply_text(
             'Bye Bye',
             reply_markup=ReplyKeyboardRemove(),
         )
         return ConversationHandler.END
-
-    context.user_data['index'] = index
-    print_current(update, way, index)
+    reply_with_step(update, solution)
     return ANSWER
 
 
