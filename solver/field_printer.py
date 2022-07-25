@@ -1,13 +1,12 @@
 from __future__ import annotations
 
-import copy
 import io
 import sys
 from typing import List, Tuple
 
 from solver.field import Field
 from solver.palette import Palette
-from solver.utils import colored_text, get_alpha
+from solver.utils import colored_text, get_alpha, print2d, map2d
 
 
 # def printer(array, row_num=None, next_line=7, header1="", header2=""):
@@ -105,28 +104,10 @@ class FieldPrinter:
         self.field_filler = ' | '
         self.header_filler = '   '
         self.header_empty = ' '
+        self.field_empty = ' '
 
         self.src_header_filler = '↑'
         self.des_header_filler = '↓'
-
-    def lines_normalizer(self, array, row_num):
-        work_array = copy.deepcopy(array)
-
-        for val in work_array:
-            cur_num = len(val)
-            if cur_num != row_num:
-                for i in range(row_num - cur_num):
-                    val.append(' ')
-
-        lines = []
-        for i in range(row_num):
-            lines.append([])
-
-        for i, col in enumerate(work_array):
-            for j, el in enumerate(col):
-                lines[row_num - j - 1].append(el)
-
-        return lines
 
     def prepare_header(self, src, des, el) -> List[str]:
         header_arr = [self.header_empty] * self.field.column
@@ -135,29 +116,28 @@ class FieldPrinter:
 
         return header_arr
 
-    def print(self, header: Tuple[str] | None = None, footer: str | None = None, stream=sys.stdout):
+    def print(self, header: Tuple[int, int, int] | str | None = None, footer: str | None = None, stream=sys.stdout):
         str_io = io.StringIO()
-        lines = self.lines_normalizer(self.field.field, self.field.dimension)
+
+        def el_transform(element):
+            if isinstance(element, int) and self.palette:
+                return colored_text(self.palette.get_color_by_index(element), get_alpha(element))
+
+            return element or self.field_empty
+
+        transformed_field_array = self.field.get_transformed_field_array()
+        transformed_field_array = map2d(el_transform, transformed_field_array)
 
         if header:
             if isinstance(header, tuple):
-                str_io.write(self.header_filler.join(self.prepare_header(*header)) + '\n')
+                print(self.header_filler.join(self.prepare_header(*header)), file=str_io)
             else:
-                str_io.write(header + '\n')
+                print(header, file=str_io)
 
-        for line in lines:
-            symbols = []
-            for symbol in line:
-                if isinstance(symbol, int):
-                    if self.palette:
-                        symbols.append(colored_text(self.palette.get_color_by_index(symbol), get_alpha(symbol)))
-                    else:
-                        symbols.append(symbol)
-                else:
-                    symbols.append(symbol)
-            str_io.write(self.field_filler.join(symbols) + '\n')
+        print2d(transformed_field_array, self.field_filler, str_io)
+
         if footer:
-            str_io.write(footer + '\n')
+            print(footer, file=str_io)
         print(str_io.getvalue(), file=stream, end='')
 
 
@@ -167,4 +147,4 @@ if __name__ == '__main__':
     field = Field(field_arr)
     palette = Palette(palette_arr)
     field_printer = FieldPrinter(field, palette)
-    field_printer.print()
+    field_printer.print(header=(1, 12, 0), footer='Step 1')

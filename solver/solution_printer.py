@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import io
+from typing import Tuple
 
 from solver.field import Field
 from solver.field_printer import FieldPrinter
@@ -35,7 +36,7 @@ class SolutionPrinter:
             footer='Solved in {} steps'.format(len(self.way))
         )
 
-    def add_step(self, field, header=None, footer=None):
+    def add_step(self, field, header: Tuple[int, int, int] | str | None = None, footer=None):
         printer = FieldPrinter(field, self.palette)
         str_io = io.StringIO()
         printer.print(header, footer, str_io)

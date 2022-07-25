@@ -51,3 +51,12 @@ def getch():
         return sys.stdin.read(1)
     finally:
         termios.tcsetattr(fd, termios.TCSAFLUSH, orig)
+
+
+def map2d(callback, res):
+    return [list(map(callback, x)) for x in res]
+
+
+def print2d(array, joiner: str, stream):
+    for line in array:
+        print(joiner.join(line), file=stream)

@@ -2,10 +2,10 @@ import math
 
 import cv2
 
-from solver.palette import Palette
 from solver.field import Field
 from solver.field_printer import FieldPrinter
-from solver.utils import get_int_color, get_file
+from solver.palette import Palette
+from solver.utils import get_int_color, get_file, map2d
 
 
 # text_color = 0, 0, 0
@@ -64,10 +64,6 @@ def resize_image(image):
     end_height = height - start_height
 
     return image[start_height:end_height]
-
-
-def map2d(callback, res):
-    return [list(map(callback, x)) for x in res]
 
 
 def comp(column):

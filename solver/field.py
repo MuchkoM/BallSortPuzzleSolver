@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import copy
 from typing import List
 
@@ -9,7 +11,6 @@ class Field:
         self.field: List[List[int]] = field_array
         self.dimension = len(field_array[0])
         self.column = len(field_array)
-        self.hash = None
 
     @property
     def is_solved(self):
@@ -21,7 +22,6 @@ class Field:
 
     def move(self, source, destination):
         self.field[destination].append(self.field[source].pop())
-        self.hash = None
 
     @property
     def enumerate(self):
@@ -43,6 +43,15 @@ class Field:
 
     def __hash__(self):
         return hash(self.tuple)
+
+    def get_transformed_field_array(self):
+        res_list: List[List[None | int]] = [[None] * self.column for _ in range(self.dimension)]
+
+        for i, col in enumerate(self.field):
+            for j, el in enumerate(col):
+                res_list[self.dimension - j - 1][i] = el
+
+        return res_list
 
 
 if __name__ == "__main__":
