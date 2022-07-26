@@ -5,7 +5,7 @@ import cv2
 from solver.field import Field
 from solver.field_printer import FieldPrinter
 from solver.palette import Palette
-from solver.utils import get_int_color, get_file, map2d
+from solver.utils import get_int_color, map2d
 
 
 # text_color = 0, 0, 0
@@ -91,7 +91,10 @@ class ScreenshotCV:
 
 
 if __name__ == '__main__':
-    analyzer = ScreenshotCV(get_file())
+    from examples.const import image_name
+
+    analyzer = ScreenshotCV(image_name)
     analyzer.analyze()
+
     printer = FieldPrinter(analyzer.field, analyzer.palette)
     printer.print()

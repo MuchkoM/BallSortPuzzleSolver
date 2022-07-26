@@ -25,3 +25,7 @@ way_arr = [
     (1, 3, 1),
     (2, 4, 2),
 ]
+
+import os
+
+image_name = os.path.join(os.path.dirname(__file__), '2022-07-20 18.31.28.jpg')

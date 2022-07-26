@@ -83,13 +83,13 @@ class FieldPrinter:
 
 
 if __name__ == '__main__':
-    from examples.level297.const import field_arr, palette_arr
+    from examples.const import field_arr, palette_arr
 
     field = Field(field_arr)
     palette = Palette(palette_arr)
     field_printer = FieldPrinter(field, palette)
     print('Output 1')
-    field_printer.print(header=(1, 12, 0), footer='Step 1')
+    field_printer.print(header=(1, 2, 0), footer='Step 1')
     print('Output 2')
     field_printer.print(footer='Solved')
     print('Output 3')

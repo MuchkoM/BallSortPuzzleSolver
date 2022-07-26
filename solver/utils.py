@@ -36,7 +36,7 @@ def all_equal(col):
 
 
 def get_file():
-    files = glob.glob('./examples/level297/*.jpeg')
+    files = glob.glob('*.jpeg')
     files.sort(key=lambda x: os.path.getctime(x))
 
     return files[-1]

@@ -12,6 +12,7 @@ from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, Conve
 
 from solver.screenshot_cv import ScreenshotCV
 from solver.solution_finder import SolutionFinder
+from solver.solution_printer import SolutionPrinter
 from solver.solution_printer_stepped import SolutionPrinterStepped
 
 logging.basicConfig(
@@ -69,7 +70,10 @@ def to_solve(update: Update, context: CallbackContext):
             'Answer was found. To navigate use text command or keyboard',
             reply_markup=ReplyKeyboardMarkup(reply_keyboard),
         )
-        context.user_data[SOLUTION] = solution = SolutionPrinterStepped(solver.field, solver.solved_way)
+        print_step_list = SolutionPrinter(solver.field, solver.solved_way)
+        print_step_list.build()
+
+        context.user_data[SOLUTION] = solution = SolutionPrinterStepped(print_step_list)
         reply_with_step(update, solution)
         return ANSWER
     else:
@@ -89,7 +93,7 @@ def cancel(update: Update, _):
     return ConversationHandler.END
 
 
-def reply_with_step(update, solution: SolutionPrinterStepped):
+def reply_with_step(update, solution):
     str_io = StringIO()
     solution.print(str_io)
     update.message.reply_text(
@@ -106,7 +110,7 @@ def answer(update: Update, context):
     elif update.message.text == '/backward':
         solution.decrement()
     elif update.message.text == '/begin':
-        solution.being()
+        solution.begin()
     elif update.message.text == '/end':
         del context.user_data[SOLUTION]
         update.message.reply_text(

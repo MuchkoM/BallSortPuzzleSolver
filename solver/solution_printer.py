@@ -23,20 +23,20 @@ class SolutionPrinter:
         self.step_list = []
 
         for i, (src, des, el) in enumerate(self.way):
-            self.add_step(
+            self._add_step(
                 field=current,
                 header=(src, des, el),
                 footer='Step {} out of {}'.format(i + 1, len(self.way))
             )
 
             current.move(src, des)
-        self.add_step(
+        self._add_step(
             field=current,
             header=' ',
             footer='Solved in {} steps'.format(len(self.way))
         )
 
-    def add_step(self, field: Field, header: Tuple[int, int, int] | str | None = None, footer: str | None = None):
+    def _add_step(self, field: Field, header: Tuple[int, int, int] | str | None = None, footer: str | None = None):
         printer = FieldPrinter(field, self.palette)
         str_io = io.StringIO()
         printer.print(header, footer, str_io)
@@ -55,11 +55,9 @@ class SolutionPrinter:
 
 
 if __name__ == '__main__':
-    from examples.level2__.const import way_arr, field_arr, palette_arr
+    from examples.const import way_arr, field_arr, palette_arr
 
-    field = Field(field_arr)
-    way = Way(way_arr)
-    palette = Palette(palette_arr)
+    field, way, palette = Field(field_arr), Way(way_arr), Palette(palette_arr)
 
     solution_printer = SolutionPrinter(field, way, palette)
     solution_printer.build()

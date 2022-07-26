@@ -80,7 +80,6 @@ class SolutionFinder:
     def inner_solve(self):
         if self.current.is_solved:
             if self.way.is_better(self.solved_way):
-                print(len(self.way))
                 self.solved_way = self.way.copy
             return
 
@@ -101,20 +100,17 @@ class SolutionFinder:
 
 
 if __name__ == "__main__":
-    from examples.level2__.const import field_arr, palette_arr
+    from examples.const import field_arr, palette_arr
 
-    field = Field(field_arr)
-    palette = Palette(palette_arr)
+    field, palette = Field(field_arr), Palette(palette_arr)
     solver = SolutionFinder(field)
 
     start = datetime.now()
     solver.solve()
     duration = datetime.now() - start
 
-    if solver.is_solved:
-        solution_printer = SolutionPrinter(field, solver.solved_way, palette)
-        solution_printer.print_way()
+    solution_printer = SolutionPrinter(field, solver.solved_way, palette)
+    solution_printer.build()
+    solution_printer.print_way()
 
-        print(solver.solved_way)
-        print(len(solver.visited))
-        print(duration)
+    print(duration)

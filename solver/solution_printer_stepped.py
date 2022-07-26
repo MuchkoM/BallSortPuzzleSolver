@@ -5,8 +5,6 @@ import sys
 
 from solver.field import Field
 from solver.palette import Palette
-from solver.screenshot_cv import ScreenshotCV
-from solver.solution_finder import SolutionFinder
 from solver.solution_printer import SolutionPrinter
 from solver.utils import getch
 from solver.way import Way
@@ -25,10 +23,8 @@ class Commands:
 
 
 class SolutionPrinterStepped:
-    def __init__(self, field: Field, way: Way, palette: Palette | None = None):
-        self.print_step_list = SolutionPrinter(field, way, palette)
-        self.print_step_list.build()
-
+    def __init__(self, solution_printer: SolutionPrinter):
+        self.solution_printer = solution_printer
         self.commands = Commands({
             '\n': self.forward,
             ' ': self.backward,
@@ -38,49 +34,52 @@ class SolutionPrinterStepped:
         self.index = 0
 
     def interact(self, stream=sys.stdout):
-        self.being()
+        self.begin()
 
+        os.system('clear')
         self.print(stream)
 
         self.commands.wait_input()
 
     def increment(self):
-        if self.index != len(self.print_step_list) - 1:
+        if self.index != len(self.solution_printer) - 1:
             self.index += 1
 
     def decrement(self):
         if self.index != 0:
             self.index -= 1
 
-    def being(self):
+    def begin(self):
         self.index = 0
 
     def forward(self, stream=sys.stdout):
         self.increment()
+        os.system('clear')
         self.print(stream)
 
     def backward(self, stream=sys.stdout):
         self.decrement()
+        os.system('clear')
         self.print(stream)
 
     def print(self, stream=sys.stdout):
-        os.system('clear')
-        print(self.print_step_list[self.index], end='', file=stream)
+        print(self.solution_printer[self.index], end='', file=stream)
 
     def end(self, stream=sys.stdout):
         print('Exit', file=stream)
         return True
 
+    def __hash__(self):
+        return hash(self.solution_printer.field)
+
 
 if __name__ == '__main__':
-    analyzer = ScreenshotCV('../examples/level3/2022-07-20 18.31.28.jpg')
-    analyzer.analyze()
+    from examples.const import field_arr, way_arr, palette_arr
 
-    solver = SolutionFinder(analyzer.field)
-    solver.solve()
+    field, way, palette = Field(field_arr), Way(way_arr), Palette(palette_arr)
 
-    if solver.is_solved:
-        solution_printer = SolutionPrinterStepped(analyzer.field, solver.solved_way, analyzer.palette)
-        solution_printer.interact()
-    else:
-        print('Solution is not found')
+    solution_printer = SolutionPrinter(field, way, palette)
+    solution_printer.build()
+
+    solution_printer_stepper = SolutionPrinterStepped(solution_printer)
+    solution_printer_stepper.interact()

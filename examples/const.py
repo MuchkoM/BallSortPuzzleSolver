@@ -1,0 +1,1 @@
+from examples.level298.const import way_arr, field_arr, image_name, palette_arr
