@@ -5,6 +5,7 @@ import uuid
 from io import StringIO
 from os.path import join, dirname
 
+import telegram
 from dotenv import load_dotenv
 from telegram import ReplyKeyboardRemove, ReplyKeyboardMarkup, Update
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, ConversationHandler, CallbackContext
@@ -88,12 +89,13 @@ def cancel(update: Update, _):
     return ConversationHandler.END
 
 
-def reply_with_step(update, solution):
+def reply_with_step(update, solution: SolutionPrinterStepped):
     str_io = StringIO()
     solution.print(str_io)
     update.message.reply_text(
-        text=str_io.getvalue(),
+        text='<pre>{}</pre>'.format(str_io.getvalue()),
         reply_markup=ReplyKeyboardMarkup(reply_keyboard),
+        parse_mode=telegram.ParseMode.HTML
     )
 
 

@@ -57,10 +57,11 @@ def map2d(callback, res):
     return [list(map(callback, x)) for x in res]
 
 
-def print2d(array, joiner: str, stream):
+def print2d(array, joiner: str, stream, pre=''):
     for line in array:
-        print1d(line, joiner, stream)
+        print1d(line, joiner, stream, pre)
 
 
-def print1d(array, joiner: str, stream):
+def print1d(array, joiner: str, stream, pre=''):
+    print(pre, file=stream, end='')
     print(*array, sep=joiner, file=stream)

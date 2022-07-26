@@ -57,7 +57,8 @@ class FieldPrinter:
 
     def print(self, header: Tuple[int, int, int] | str | None = None, footer: str | None = None, stream=sys.stdout):
         str_io = io.StringIO()
-        split_index = self.field.column // 2
+        div, mod = divmod(self.field.column, 2)
+        split_index = div + mod
 
         def el_transform(element):
             if element is None:
@@ -72,7 +73,8 @@ class FieldPrinter:
                 print1d(header_part, self.header_filler, str_io)
             else:
                 print(header_part, file=str_io)
-            print2d(transformer_field_part, self.field_filler, str_io)
+            pre = '  ' if i == 1 and mod == 1 else ''
+            print2d(transformer_field_part, self.field_filler, str_io, pre)
         if footer:
             print(footer, file=str_io)
         else:
