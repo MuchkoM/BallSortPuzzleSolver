@@ -21,50 +21,31 @@ class SolutionFinder:
     def is_solved(self):
         return self.solved_way and len(self.solved_way) > 0
 
-    def filter_source_cols(self, cols):
-        def filter_cond(x):
-            src_index, src_column = x
-
-            src_len = len(src_column)
-            if src_len == 0:
-                return False
-
-            if (src_len == self.dimension or src_len == self.dimension - 1) and all_equal(src_column):
-                return False
-
-            return True
-
-        return filter(filter_cond, cols)
-
-    def filter_des_cols(self, current_enum, src_index, src_column):
-        def filter_cond(x):
-            des_index, des_column = x
-
-            if src_index == des_index:
-                return False
-
-            des_len = len(des_column)
-
-            if des_len == self.dimension:
-                return False
-
-            if not ((des_len > 0 and des_column[-1] == src_column[-1]) or (des_len == 0)):
-                return False
-
-            if des_len == 0 and all_equal(src_column):
-                return False
-
-            if (des_index, src_index, src_column[-1]) in self.way:
-                return False
-
-            return True
-
-        return filter(filter_cond, current_enum)
-
     def get_next_possible_way(self):
-        for src_index, src_column in self.filter_source_cols(self.current.enumerate):
-            for des_index, des_column in self.filter_des_cols(self.current.enumerate, src_index, src_column):
-                yield src_index, src_column, des_index, des_column, src_column[-1]
+        cols = []
+        for i, col in self.current.enumerate:
+            col_len = len(col)
+            cols.append((i, col, col_len, all_equal(col) if col_len > 2 else False))
+
+        res = []
+        for src_index, src_column, src_len, is_equal in cols:
+            if src_len == 0:
+                continue
+            if (src_len == self.dimension or src_len == self.dimension - 1) and is_equal:
+                continue
+            for des_index, des_column, des_len, _ in cols:
+                if src_index == des_index:
+                    continue
+                if des_len == self.dimension:
+                    continue
+                if not ((des_len > 0 and des_column[-1] == src_column[-1]) or (des_len == 0)):
+                    continue
+                if des_len == 0 and is_equal:
+                    continue
+                if (des_index, src_index, src_column[-1]) in self.way:
+                    continue
+                res.append((src_index, des_index, src_column[-1]))
+        return res
 
     def solve(self):
         self.current = self.field.copy
@@ -89,7 +70,7 @@ class SolutionFinder:
         if self.visited.is_known(self.current, self.way):
             return
 
-        for src_index, src_column, des_index, des_column, element in self.get_next_possible_way():
+        for src_index, des_index, element in self.get_next_possible_way():
             self.way.push((src_index, des_index, element))
             self.current.move(src_index, des_index)
 
