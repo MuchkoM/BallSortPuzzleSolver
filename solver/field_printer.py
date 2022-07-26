@@ -69,11 +69,11 @@ class FieldPrinter:
                                                     self.splatted_header(header, split_index))):
             transformer_field_part = get_transformed_field_array(part, self.field.dimension)
             transformer_field_part = map2d(el_transform, transformer_field_part)
+            pre = '  ' if i == 1 and mod == 1 else ''
             if isinstance(header, tuple):
-                print1d(header_part, self.header_filler, str_io)
+                print1d(header_part, self.header_filler, str_io, pre)
             else:
                 print(header_part, file=str_io)
-            pre = '  ' if i == 1 and mod == 1 else ''
             print2d(transformer_field_part, self.field_filler, str_io, pre)
         if footer:
             print(footer, file=str_io)
