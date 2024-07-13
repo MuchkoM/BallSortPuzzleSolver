@@ -7,15 +7,9 @@ from solver.field_printer import FieldPrinter
 from solver.palette import Palette
 from solver.utils import get_int_color, map2d
 
+SHOW_WINDOWS = False
 
-# text_color = 0, 0, 0
-# font = cv2.FONT_HERSHEY_SIMPLEX
-# cv2.putText(vis, str(element[2]), (element[0] - 10, element[1] + 10), font, 1, text_color, 2)
 
-# cv2.drawContours(vis, contours, -1, (0, 0, 255))
-# cv2.imshow('image', vis)
-# cv2.waitKey(0)
-# cv2.destroyAllWindows()
 def hierarchy_analyser(hierarchy):
     out_contour = 0
     result = []
@@ -60,7 +54,7 @@ def build_contours(image):
 
 def resize_image(image):
     height = image.shape[0]
-    start_height = height // 10
+    start_height = height // 5
     end_height = height - start_height
 
     return image[start_height:end_height]
@@ -82,6 +76,12 @@ class ScreenshotCV:
     def analyze(self):
         image = resize_image(cv2.imread(self.path))
         contours, hierarchy = build_contours(image)
+        if SHOW_WINDOWS:
+            vis = image.copy()
+            cv2.drawContours(vis, contours, -1, (0, 0, 255))
+            cv2.imshow('image', vis)
+            cv2.waitKey(0)
+            cv2.destroyAllWindows()
         self.palette = Palette()
         res = hierarchy_analyser(hierarchy[0])
         res = map2d(lambda x: build_element(contours[x], image, self.palette), res)

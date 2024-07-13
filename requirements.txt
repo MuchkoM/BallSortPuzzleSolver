@@ -1,3 +1,4 @@
 python-telegram-bot==13.13
 opencv-python==4.10.0.82
+numpy<2.0
 python-dotenv==0.20.0

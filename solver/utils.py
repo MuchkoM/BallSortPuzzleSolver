@@ -2,8 +2,6 @@ import glob
 import math
 import os
 import sys
-import termios
-import tty
 from typing import Union, Tuple
 
 
@@ -43,6 +41,8 @@ def get_file():
 
 
 def getch():
+    import termios
+    import tty
     fd = sys.stdin.fileno()
     orig = termios.tcgetattr(fd)
 
